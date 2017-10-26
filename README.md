@@ -17,5 +17,6 @@ This lua library is for windows (mingw) only . It's similar to [lfs](https://kep
 * loadfile ==> winfile.loadfile
 * dofile ==> winfile.dofile
 * io.open ==> winfile.open
+* io.popen ==> winfile.popen
 * winfile.shortname : Get the shorname of the path.
 * winfile.personaldir : Get My Document dir.

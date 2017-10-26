@@ -718,6 +718,33 @@ lopen(lua_State *L) {
 	return (p->f == NULL) ? luaL_fileresult(L, 0, filename) : 1;
 }
 
+static int io_pclose (lua_State *L) {
+	LStream *p = tolstream(L);
+	return luaL_execresult(L, _pclose(p->f));
+}
+
+static int
+lpopen(lua_State *L) {
+	size_t sz;
+	const char *filename = luaL_checklstring(L, 1, &sz);
+	wchar_t path[sz+1];
+	int winsz = windows_filename(L, filename, sz, path, sz);
+	path[winsz] = 0;
+
+	const char *mode = luaL_optstring(L, 2, "r");
+	LStream *p = newprefile(L);
+
+	const char *md = mode;
+	int n = strlen(md);
+	wchar_t wmode[n+1];
+	n = windows_filename(L, md, n, wmode, n);
+	wmode[n] = 0;
+
+	p->f = _wpopen(path, wmode);
+	p->closef = &io_pclose;
+	return (p->f == NULL) ? luaL_fileresult(L, 0, filename) : 1;
+}
+
 static int
 lexecute(lua_State *L) {
 	size_t sz;
@@ -779,6 +806,7 @@ luaopen_winfile(lua_State *L) {
 		{ "open", lopen },
 		{ "execute", lexecute },
 		{ "getenv", lgetenv },
+		{ "popen", lpopen },
 		{ NULL, NULL },
 	};
 	luaL_newlib(L, l);
